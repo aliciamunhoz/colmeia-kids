@@ -92,6 +92,25 @@ export const getRecentRecords = (d: AppData, childId: ID, limit = 5) =>
     .sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`))
     .slice(0, limit);
 
+export type ChildHistoryItem = { key: string; date: ISODate; time: string } & (
+  | { kind: 'checkIn' | 'checkOut'; byName: string }
+  | { kind: 'absence'; reason: string }
+  | { kind: 'record'; record: DailyRecord }
+);
+
+export function getChildHistory(d: AppData, childId: ID): ChildHistoryItem[] {
+  const items: ChildHistoryItem[] = [];
+  for (const a of d.attendance.filter((x) => x.childId === childId)) {
+    if (a.checkIn) items.push({ key: `${a.id}-in`, date: a.date, time: a.checkIn.time, kind: 'checkIn', byName: a.checkIn.byName });
+    if (a.checkOut) items.push({ key: `${a.id}-out`, date: a.date, time: a.checkOut.time, kind: 'checkOut', byName: a.checkOut.byName });
+    if (a.absence) items.push({ key: `${a.id}-abs`, date: a.date, time: '', kind: 'absence', reason: a.absence.reason });
+  }
+  for (const r of d.records.filter((x) => x.childId === childId)) {
+    items.push({ key: r.id, date: r.date, time: r.time, kind: 'record', record: r });
+  }
+  return items.sort((a, b) => `${b.date}${b.time}`.localeCompare(`${a.date}${a.time}`));
+}
+
 type RecordOf<T extends DailyRecord['type']> = Extract<DailyRecord, { type: T }>;
 const ofType = <T extends DailyRecord['type']>(records: DailyRecord[], type: T) =>
   records.filter((r): r is RecordOf<T> => r.type === type);

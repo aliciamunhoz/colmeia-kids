@@ -1,13 +1,30 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Avatar, Button, Chip, Icon, IconButton, IconTile, OptionGroup, Screen, ScreenHeader, SectionHeader, SegmentedControl, Switch, TextField, type AvatarName } from '@/components';
+import { AppText, Avatar, Button, Card, Chip, Icon, IconButton, IconTile, LinkText, OptionGroup, Screen, ScreenHeader, SectionHeader, SegmentedControl, Switch, TextField, type AvatarName, type IconName } from '@/components';
 import { useCurrentUser } from '@/context/AuthContext';
-import { formatCurrency, getChild, getRoomsForDaycare, getUsersForDaycare, isFutureDate, parseDisplayDate, TODAY, toDisplayDate, useData } from '@/data';
+import { formatCurrency, formatRelativeDay, getChild, getChildHistory, getRoomsForDaycare, getUsersForDaycare, isFutureDate, parseDisplayDate, TODAY, toDisplayDate, useData, type ChildHistoryItem } from '@/data';
 import type { AdminStackScreenProps } from '@/navigation/types';
-import { colors, radius, spacing } from '@/theme';
+import { colors, radius, spacing, type Tone } from '@/theme';
+import { describeRecord } from '../shared/presentation';
 
 const AVATARS: AvatarName[] = ['child1', 'child2', 'child3', 'child4'];
+const HISTORY_PAGE = 8;
+
+function historyView(item: ChildHistoryItem): { icon: IconName; tone: Tone; title: string; subtitle?: string } {
+  switch (item.kind) {
+    case 'checkIn':
+      return { icon: 'login', tone: 'green', title: 'Check-in', subtitle: `By ${item.byName}` };
+    case 'checkOut':
+      return { icon: 'logout', tone: 'blue', title: 'Check-out', subtitle: `By ${item.byName}` };
+    case 'absence':
+      return { icon: 'x', tone: 'red', title: 'Absent', subtitle: item.reason };
+    case 'record': {
+      const view = describeRecord(item.record);
+      return { icon: view.icon, tone: view.tone, title: view.title, subtitle: view.subtitle };
+    }
+  }
+}
 
 export function ChildFormScreen({ navigation, route }: AdminStackScreenProps<'ChildForm'>) {
   const { data, actions } = useData();
@@ -28,6 +45,8 @@ export function ChildFormScreen({ navigation, route }: AdminStackScreenProps<'Ch
   const [plan, setPlan] = useState<'fullTime' | 'halfDay'>(existing?.feePlan ?? 'fullTime');
   const [meals, setMeals] = useState(existing?.mealsIncluded ?? true);
   const [errors, setErrors] = useState<{ name?: string; birth?: string; start?: string }>({});
+  const [historyLimit, setHistoryLimit] = useState(HISTORY_PAGE);
+  const history = existing ? getChildHistory(data, existing.id) : [];
 
   const monthlyFee = (plan === 'fullTime' ? prices.fullTime : prices.halfDay) + (meals ? prices.meals : 0);
 
@@ -127,6 +146,38 @@ export function ChildFormScreen({ navigation, route }: AdminStackScreenProps<'Ch
       <AppText variant="bodyStrong">Monthly fee: {formatCurrency(monthlyFee)}</AppText>
 
       <Button title={existing ? 'Save form' : 'Enrol child'} icon="check" fullWidth onPress={save} />
+
+      {existing && (
+        <>
+          <SectionHeader title={`History (${history.length})`} />
+          {history.length === 0 ? (
+            <AppText color="textSecondary">No records yet.</AppText>
+          ) : (
+            <Card>
+              {history.slice(0, historyLimit).map((item) => {
+                const view = historyView(item);
+                return (
+                  <View key={item.key} style={styles.row}>
+                    <IconTile icon={view.icon} tone={view.tone} size={36} />
+                    <View style={styles.flex}>
+                      <AppText variant="bodyStrong">{view.title}</AppText>
+                      {view.subtitle ? (
+                        <AppText variant="small" color="textSecondary" numberOfLines={1}>{view.subtitle}</AppText>
+                      ) : null}
+                    </View>
+                    <AppText variant="caption" color="textSecondary">
+                      {formatRelativeDay(item.date)}{item.time ? `, ${item.time}` : ''}
+                    </AppText>
+                  </View>
+                );
+              })}
+              {history.length > historyLimit && (
+                <LinkText label="Show more" onPress={() => setHistoryLimit((n) => n + HISTORY_PAGE)} center />
+              )}
+            </Card>
+          )}
+        </>
+      )}
     </Screen>
   );
 }
