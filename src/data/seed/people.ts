@@ -4,8 +4,8 @@ import type { AuthorisedPickup, Child, Daycare, Room, User } from '@/types/model
 // Password de todas as contas da demo: colmeia123
 
 export const daycares: Daycare[] = [
-  { id: 'dc_braganca', name: 'Colmeia Daycare', city: 'Bragança', address: 'Rua das Abelhas, 12, 5300 Bragança', phone: '+351 273 000 000', openingHours: 'Mon to Fri · 07:30 – 19:00', prices: { fullTime: 280, halfDay: 210, meals: 40 } },
-  { id: 'dc_porto', name: 'Colmeia Daycare', city: 'Porto', address: 'Rua do Mel, 45, 4000 Porto', phone: '+351 220 000 000', openingHours: 'Mon to Fri · 07:30 – 19:30', prices: { fullTime: 300, halfDay: 230, meals: 40 } },
+  { id: 'dc_braganca', name: 'Colmeia Daycare', city: 'Bragança', address: 'Rua das Abelhas, 12, 5300 Bragança', phone: '+351 273 000 000', openingHours: 'Mon to Fri · 07:30 – 19:00', prices: { fullTime: 280, halfDay: 210, meals: 40 }, coordinates: { latitude: 41.8061, longitude: -6.7567 } },
+  { id: 'dc_porto', name: 'Colmeia Daycare', city: 'Porto', address: 'Rua do Mel, 45, 4000 Porto', phone: '+351 220 000 000', openingHours: 'Mon to Fri · 07:30 – 19:30', prices: { fullTime: 300, halfDay: 230, meals: 40 }, coordinates: { latitude: 41.1496, longitude: -8.6109 } },
 ];
 
 export const users: User[] = [

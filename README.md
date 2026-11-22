@@ -51,7 +51,7 @@ Um utilizador criado pela administração (Utilizadores → **+**) fica com a pa
 - **Data fixa:** a app está em **sexta-feira, 25 de setembro de 2026**, para os dados coincidirem com o Figma. As horas dos novos registos são as reais.
 - **Diário:** o do Tomás tem registos de segunda a sexta (21 a 25 de setembro).
 - **Repor os dados iniciais:** entre como encarregado e use Perfil → **Reset demo data**. Assim apaga todas as alterações feitas nos testes.
-- **Chave de gravação:** se o modelo de dados mudar no código, a chave em `src/data/DataContext.tsx` (`colmeia-kids:data:v4`) também tem de mudar; só assim os dados antigos são ignorados.
+- **Chave de gravação:** se o modelo de dados mudar no código, a chave em `src/data/DataContext.tsx` (`colmeia-kids:data:v5`) também tem de mudar; só assim os dados antigos são ignorados.
 
 ## Testes manuais sugeridos
 

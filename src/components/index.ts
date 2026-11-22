@@ -5,6 +5,7 @@ export { Card } from './Card';
 export { ChildSwitcher } from './ChildSwitcher';
 export { Chip } from './Chip';
 export { CoverImage } from './CoverImage';
+export { GoogleMap } from './GoogleMap/GoogleMap';
 export { Icon, type IconName } from './Icon/Icon';
 export { IconButton } from './IconButton';
 export { IconTile } from './IconTile';

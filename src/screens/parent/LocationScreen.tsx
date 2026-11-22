@@ -2,7 +2,7 @@ import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
-import { AppText, Button, Icon, IconButton, IconTile } from '@/components';
+import { AppText, Button, GoogleMap, IconButton, IconTile } from '@/components';
 import { useCurrentUser } from '@/context/AuthContext';
 import { colors, radius, spacing } from '@/theme';
 
@@ -10,31 +10,24 @@ export function LocationScreen() {
   const navigation = useNavigation();
   const { daycare } = useCurrentUser();
 
+  const place = daycare.coordinates
+    ? `${daycare.coordinates.latitude},${daycare.coordinates.longitude}`
+    : daycare.address;
+
   const openMaps = () =>
-    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${daycare.name}, ${daycare.address}`)}`);
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place)}`);
 
   return (
     <View style={styles.screen}>
-      <View style={styles.map} accessibilityLabel={`Map showing ${daycare.name}`}>
-        <View style={[styles.park, { top: 20, left: 20, width: 120, height: 110 }]} />
-        <View style={[styles.park, { top: 330, right: 0, width: 140, height: 120 }]} />
-        <View style={[styles.road, { top: 170, left: -40, right: -40, height: 26, transform: [{ rotate: '-6deg' }] }]} />
-        <View style={[styles.road, { top: -20, bottom: -20, left: '45%', width: 22 }]} />
-        <View style={[styles.road, { top: 260, left: -60, right: -60, height: 22, transform: [{ rotate: '-28deg' }] }]} />
-        <View style={styles.river} />
-        <View style={styles.pin}>
-          <View style={styles.pinLabel}>
-            <AppText variant="caption" color="textOnPrimary">{daycare.name}</AppText>
-          </View>
-          <Icon name="pin" size={40} color={colors.danger} />
-        </View>
+      <View style={styles.map}>
+        <GoogleMap query={place} title={`${daycare.name} · ${daycare.city}`} />
       </View>
 
       <SafeAreaView edges={['top']} style={styles.overlay} pointerEvents="box-none">
         <View style={styles.topBar}>
           <IconButton icon="back" accessibilityLabel="Back" onPress={() => navigation.goBack()} />
           <View style={styles.titleBox}>
-            <AppText variant="bodyStrong">Location</AppText>
+            <AppText variant="bodyStrong" numberOfLines={1}>{daycare.name} · {daycare.city}</AppText>
           </View>
         </View>
       </SafeAreaView>
@@ -67,21 +60,7 @@ function InfoRow({ icon, tone, title, detail }: { icon: 'home' | 'clock' | 'phon
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  map: { flex: 1, backgroundColor: '#EEF2EC', overflow: 'hidden' },
-  park: { position: 'absolute', backgroundColor: colors.successSoft, borderRadius: 4 },
-  road: { position: 'absolute', backgroundColor: colors.surface },
-  river: {
-    position: 'absolute',
-    left: -80,
-    top: 220,
-    width: 260,
-    height: 400,
-    borderRadius: 200,
-    borderWidth: 14,
-    borderColor: colors.infoSoft,
-  },
-  pin: { position: 'absolute', top: 110, left: '38%', alignItems: 'center', gap: 4 },
-  pinLabel: { backgroundColor: colors.primary, paddingHorizontal: spacing.sm, paddingVertical: 3, borderRadius: radius.pill },
+  map: { flex: 1, overflow: 'hidden' },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0 },
   topBar: { flexDirection: 'row', gap: spacing.sm, padding: spacing.md },
   titleBox: { flex: 1, justifyContent: 'center', paddingHorizontal: spacing.md, backgroundColor: colors.surface, borderRadius: radius.md },

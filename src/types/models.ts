@@ -21,6 +21,7 @@ export type Daycare = {
   phone: string;
   openingHours: string;
   prices: { fullTime: number; halfDay: number; meals: number };
+  coordinates?: { latitude: number; longitude: number };
 };
 
 export type Room = {

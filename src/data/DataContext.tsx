@@ -27,7 +27,7 @@ import { createId, nowDateTime, nowTime, TODAY } from './utils';
 // v2: etapa 6.1 (capas, milestones, tipos de notificação…)
 // v3: etapa 6.2 (níveis de avaliação, humor, autorizações de recolha…)
 // v4: etapa 6.3 (preços, itens de fatura, cores das salas, faltas…)
-const STORAGE_KEY = 'colmeia-kids:data:v4';
+const STORAGE_KEY = 'colmeia-kids:data:v5';
 
 // Omit "distributivo": aplica o Omit a CADA membro da união.
 // (Omit<DailyRecord, 'id'> normal juntava tudo e perdia a ligação type ↔ campos.)
