@@ -93,6 +93,8 @@ function createActions(dispatch: React.Dispatch<Parameters<typeof dataReducer>[1
 
     // "save" = criar (sem id) ou editar (com id). Devolvem o id, para o ecrã
     // poder navegar logo a seguir (ex.: para o ecrã de confirmação).
+    removeUser: (userId: ID) => dispatch({ type: 'REMOVE_USER', userId }),
+
     saveUser: (user: Omit<User, 'id'> & { id?: ID }) => {
       const id = user.id ?? createId('u');
       dispatch({ type: 'UPSERT_USER', user: { ...user, id } });

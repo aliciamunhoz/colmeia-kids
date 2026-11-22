@@ -62,6 +62,7 @@ export type DataAction =
   | { type: 'UPSERT_INVOICE'; invoice: Invoice }
   | { type: 'UPSERT_ATTENDANCE'; attendance: Attendance }
   | { type: 'UPSERT_USER'; user: User }
+  | { type: 'REMOVE_USER'; userId: ID }
   | { type: 'UPSERT_CHILD'; child: Child }
   | { type: 'CREATE_INVOICE'; invoice: Invoice }
   | { type: 'RECORD_PAYMENT'; invoiceId: ID; payment: Payment };
@@ -161,6 +162,28 @@ export function dataReducer(state: AppData, action: DataAction): AppData {
 
     case 'UPSERT_USER':
       return { ...state, users: upsert(state.users, action.user) };
+
+    case 'REMOVE_USER': {
+      const id = action.userId;
+      const removedConversations = new Set(
+        state.conversations.filter((c) => c.type === 'direct' && c.participantIds.includes(id)).map((c) => c.id),
+      );
+      return {
+        ...state,
+        users: state.users.filter((u) => u.id !== id),
+        children: state.children.map((c) =>
+          c.guardianIds.includes(id) ? { ...c, guardianIds: c.guardianIds.filter((g) => g !== id) } : c,
+        ),
+        rooms: state.rooms.map((r) =>
+          r.educatorIds.includes(id) ? { ...r, educatorIds: r.educatorIds.filter((e) => e !== id) } : r,
+        ),
+        conversations: state.conversations
+          .filter((c) => !removedConversations.has(c.id))
+          .map((c) => (c.participantIds.includes(id) ? { ...c, participantIds: c.participantIds.filter((p) => p !== id) } : c)),
+        messages: state.messages.filter((m) => !removedConversations.has(m.conversationId)),
+        notifications: state.notifications.filter((n) => n.userId !== id),
+      };
+    }
 
     case 'UPSERT_CHILD':
       return { ...state, children: upsert(state.children, action.child) };

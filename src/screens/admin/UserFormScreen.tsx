@@ -5,7 +5,7 @@ import { AppText, Button, Card, Chip, IconTile, OptionGroup, Screen, ScreenHeade
 import { useAuth, useCurrentUser } from '@/context/AuthContext';
 import { getChildrenInDaycare, getRoomsForDaycare, getUser, isEmailTaken, isValidEmail, normalizeEmail, nowDateTime, useData } from '@/data';
 import type { AdminStackScreenProps } from '@/navigation/types';
-import { spacing } from '@/theme';
+import { colors, spacing } from '@/theme';
 import type { Permission, Role } from '@/types/models';
 
 const permissionLabels: Record<Permission, string> = {
@@ -35,6 +35,8 @@ export function UserFormScreen({ navigation, route }: AdminStackScreenProps<'Use
   const [blocked, setBlocked] = useState(existing?.blocked ?? false);
   const [invite, setInvite] = useState(true);
   const [errors, setErrors] = useState<{ name?: string; email?: string }>({});
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const canRemove = existing !== undefined && existing.id !== me?.id;
 
   const toggle = <T,>(list: T[], value: T) => (list.includes(value) ? list.filter((x) => x !== value) : [...list, value]);
 
@@ -75,6 +77,12 @@ export function UserFormScreen({ navigation, route }: AdminStackScreenProps<'Use
     }
 
     navigation.replace('Done', { kind: 'user', id, created: !existing });
+  };
+
+  const remove = () => {
+    if (!existing) return;
+    actions.removeUser(existing.id);
+    navigation.goBack();
   };
 
   return (
@@ -138,6 +146,23 @@ export function UserFormScreen({ navigation, route }: AdminStackScreenProps<'Use
       )}
 
       <Button title={existing ? 'Save changes' : 'Create user'} icon={existing ? 'check' : 'plus'} fullWidth onPress={save} />
+
+      {canRemove && !confirmRemove && (
+        <Button title="Remove user" icon="trash" variant="danger" fullWidth onPress={() => setConfirmRemove(true)} />
+      )}
+
+      {canRemove && confirmRemove && (
+        <Card style={styles.confirm}>
+          <AppText variant="bodyStrong">Remove {existing.name}?</AppText>
+          <AppText variant="small" color="textSecondary">
+            The account is deleted and unlinked from rooms and children. This cannot be undone.
+          </AppText>
+          <View style={styles.confirmActions}>
+            <Button title="Cancel" variant="secondary" onPress={() => setConfirmRemove(false)} style={styles.flex} />
+            <Button title="Remove" icon="trash" variant="dangerSolid" onPress={remove} style={styles.flex} />
+          </View>
+        </Card>
+      )}
     </Screen>
   );
 }
@@ -146,4 +171,6 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xxs },
+  confirm: { borderColor: colors.danger },
+  confirmActions: { flexDirection: 'row', gap: spacing.sm },
 });
