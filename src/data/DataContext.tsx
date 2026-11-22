@@ -95,6 +95,8 @@ function createActions(dispatch: React.Dispatch<Parameters<typeof dataReducer>[1
     // poder navegar logo a seguir (ex.: para o ecrã de confirmação).
     removeUser: (userId: ID) => dispatch({ type: 'REMOVE_USER', userId }),
 
+    removeRoom: (roomId: ID) => dispatch({ type: 'REMOVE_ROOM', roomId }),
+
     saveUser: (user: Omit<User, 'id'> & { id?: ID }) => {
       const id = user.id ?? createId('u');
       dispatch({ type: 'UPSERT_USER', user: { ...user, id } });

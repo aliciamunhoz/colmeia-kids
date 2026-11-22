@@ -58,6 +58,7 @@ export type DataAction =
   | { type: 'START_CONVERSATION'; conversation: Conversation }
   | { type: 'UPSERT_DEVELOPMENT'; report: DevelopmentReport }
   | { type: 'UPSERT_ROOM'; room: Room }
+  | { type: 'REMOVE_ROOM'; roomId: ID }
   | { type: 'UPSERT_DAYCARE'; daycare: Daycare }
   | { type: 'UPSERT_INVOICE'; invoice: Invoice }
   | { type: 'UPSERT_ATTENDANCE'; attendance: Attendance }
@@ -147,6 +148,21 @@ export function dataReducer(state: AppData, action: DataAction): AppData {
 
     case 'UPSERT_DEVELOPMENT':
       return { ...state, development: upsert(state.development, action.report) };
+
+    case 'REMOVE_ROOM': {
+      const id = action.roomId;
+      const removedConversations = new Set(
+        state.conversations.filter((c) => c.type === 'room' && c.roomId === id).map((c) => c.id),
+      );
+      return {
+        ...state,
+        rooms: state.rooms.filter((r) => r.id !== id),
+        activities: state.activities.filter((a) => a.roomId !== id),
+        announcements: state.announcements.filter((a) => a.roomId !== id),
+        conversations: state.conversations.filter((c) => !removedConversations.has(c.id)),
+        messages: state.messages.filter((m) => !removedConversations.has(m.conversationId)),
+      };
+    }
 
     case 'UPSERT_ROOM':
       return { ...state, rooms: upsert(state.rooms, action.room) };
